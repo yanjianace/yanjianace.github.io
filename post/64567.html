@@ -1,0 +1,297 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Lindorm系列(二)Lindorm的二级索引 | 光曦的博客</title><meta name="author" content="GuangXi Yan"><meta name="copyright" content="GuangXi Yan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1.引言​	系列的上一篇文章简要介绍了Lindorm的基本信息，我们知道了它是做什么的。本文简要介绍Lindorm全局二级索引的基本功能，然后讨论一些高级特性和关键技术挑战，最后，通过实际案例介绍Lindorm全局二级索引的使用。  ​	Lindorm是一个支持多模型的系统，目前提供KeyValue、WideColumn、Tabular三种模型，并通过作为TSDB的存储引擎可扩展支持时序、时空模型">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lindorm系列(二)Lindorm的二级索引">
+<meta property="og:url" content="https://yanjianace.github.io/post/64567.html">
+<meta property="og:site_name" content="光曦的博客">
+<meta property="og:description" content="1.引言​	系列的上一篇文章简要介绍了Lindorm的基本信息，我们知道了它是做什么的。本文简要介绍Lindorm全局二级索引的基本功能，然后讨论一些高级特性和关键技术挑战，最后，通过实际案例介绍Lindorm全局二级索引的使用。  ​	Lindorm是一个支持多模型的系统，目前提供KeyValue、WideColumn、Tabular三种模型，并通过作为TSDB的存储引擎可扩展支持时序、时空模型">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000">
+<meta property="article:published_time" content="2023-02-24T02:59:26.000Z">
+<meta property="article:modified_time" content="2023-02-24T03:54:13.775Z">
+<meta property="article:author" content="GuangXi Yan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yanjianace.github.io/post/64567.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Lindorm系列(二)Lindorm的二级索引',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-02-24 11:54:13'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = url => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      link.onload = () => resolve()
+      link.onerror = () => reject()
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="光曦的博客"><span class="site-name">光曦的博客</span></a></span><div id="menus"><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Lindorm系列(二)Lindorm的二级索引</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-02-24T02:59:26.000Z" title="发表于 2023-02-24 10:59:26">2023-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-02-24T03:54:13.775Z" title="更新于 2023-02-24 11:54:13">2023-02-24</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Lindorm系列(二)Lindorm的二级索引"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-引言"><a href="#1-引言" class="headerlink" title="1.引言"></a>1.引言</h1><p>​	系列的上一篇文章简要介绍了Lindorm的基本信息，我们知道了它是做什么的。本文简要介绍Lindorm全局二级索引的基本功能，然后讨论一些高级特性和关键技术挑战，最后，通过实际案例介绍Lindorm全局二级索引的使用。 </p>
+<p>​	Lindorm是一个支持多模型的系统，目前提供KeyValue、WideColumn、Tabular三种模型，并通过作为TSDB的存储引擎可扩展支持时序、时空模型。KeyValue、WideColumn模型可通过HBase兼容客户端及原生API提供服务Tabular(关系表)模型通过SQL-like API和JDBC提供服务。Lindorm表天然具备主键索引，可以很好的满足主键匹配模式的查询需求，但对于非主键条件匹配的查询场景，大多数NoSQL系统则需要通过扫描主表并过滤的方式进行查询，通常效率低下。为此，用户需要维护多个表来满足不同场景的查询需求，这在一定程度上既增加了应用的开发复杂性，也不能很完美地保证数据一致性和写入效率。所以，在打造Lindorm时，我们将二级索引作为核心功能来设计，以满足绝大多数通用的索引查询需求，并结合SQL-Like API&#x2F;JDBC，用户可以从容的表达多条件查询，透明的使用多个索引。  </p>
+<h1 id="2-功能介绍"><a href="#2-功能介绍" class="headerlink" title="2.功能介绍"></a>2.功能介绍</h1><p>​	 从使用者的角度看，使用Lindorm的全局二级索引利和使用RDBMS的二级索引基本一致。下面我们看一个简单示例:店铺和商品关系表，shop_item_relation，店铺省和商品都有各自全局唯一的id，二者是多对多的关系。这个关系有一个名为 状态 (status)的属性描述了该关系是否否启用。                                 </p>
+<blockquote>
+<p>– 主表和索引DDL<br>create table shop item relation (<br>shop id varchar, item id varchar, status varchar<br>constraint primary key(shop id, item id))</p>
+<p>create index idx1 on shop item relation (i tem_id) include(ALL); – 对第二列主键建索引，冗余所; create index idx2 on shop item relation (s shop_id, status) include (ALL); – 多列索引，冗余所有:<br>–写入数据，会同步更新2个索引<br>upsert into shop item relation values(‘sho ppl’, ‘iteml’, ‘active’);<br>upsert into shop item relation values(‘sho opl’, ‘item2’, ‘invalid’); </p>
+<p>– 根据WHERE子句自动选择合适的索引执行查询<br>select * from shop item relation where ite emid &#x3D;’item2’; – 命中idx1</p>
+</blockquote>
+<p>​	可见，通过SQL来使用Lindorm是非常简单的。</p>
+<p>​	Lindorm全局二级索引支持为单表建多个索引，每个索引在物理上映射为一张数据表，与主表相互独立，可以有不同的存储策略(如采用不同的压缩算法、冷热分离策略)等属性。写主表时，Lindorm会自动更新所有索引表，并确保主表和索引表数据的一致性。读数据时，用户只需针对主表发起查询，Lindorm会根据WHERE条件和schema自动选择合适的索引(包括主表)执行查询(支持HINT来干预优化器行为)。</p>
+<p>​	Lindorm全局二级索引的基本特性如下:</p>
+<ul>
+<li>支持单个主表建多个索引</li>
+<li>支持单列和多列索引(组合索引)</li>
+<li>支持冗余索引: 全冗余索引 可自动冗余主表新增的列</li>
+<li>查询优化:根据WHERE自动选择合适的索引，也支持hint来显式干预优化器的选择</li>
+<li>online schema change:索引变更不影响主表的正常读写，可以随时添加&#x2F;删除&#x2F;变更索引</li>
+<li>支持数据有效期(TTL):索引表会自动继承主表的TTL设置，主表和索引表数据一起过期支持动态列:支持写入动态列，冗余动态列</li>
+<li>支持自定义数据版本:用户自定义时间戳写入数据</li>
+</ul>
+<h1 id="3-重要特性"><a href="#3-重要特性" class="headerlink" title="3 重要特性"></a>3 重要特性</h1><h2 id="3-1-强一致性"><a href="#3-1-强一致性" class="headerlink" title="3.1 强一致性"></a>3.1 强一致性</h2><p>​	这里的数据一致性是指主表和索引表的数据一致性，从用户角度看，即主表写成功后，索引更新何时可见。 Lindorm全局二级索引提供如下约束的强一致性语义。</p>
+<ul>
+<li><p>返回客户端写入成功，则之后能通过主表或索引表立即读到写入的数据，但写入过程中不保证同时可见，即不 支持快照隔离性 。</p>
+</li>
+<li><p>返回超时或IO出错，则在一段时间内，该数据在主表和索引表中的可见性无法确定，但最终一定保持一致，即要么全成功，要么全不成功。</p>
+</li>
+</ul>
+<p>​    Lindorm的主要场景是高吞吐和低时延，所以，我们设计了一种有一定约束的强一致的数据模型，使得在满足大多数用户的一致性诉求的同时，最大程度减少二级索引的额外开销，从而继续提供高吞吐的写入能力。</p>
+<h2 id="3-2-可选的索引组织成本"><a href="#3-2-可选的索引组织成本" class="headerlink" title="3.2 可选的索引组织成本"></a>3.2 可选的索引组织成本</h2><p>​	维护索引是有成本的。为了维护索引，原本只写一次主表，必然要增加写索引的操作。但实际情况要比这复杂，在有一个索引的情况下，写放大不是1:2，而是1:4。主表的一次写会放大为四次操作:读主表，删除索引脏数据，写索引，写主表。因为 数据更新 场景下，索引行的主键值会被改变，所以必须删除索引老(脏)数据，插入新数据。为了获得老索引行的主键，须读一次主表。所以，才有了1:4的写放大(如下图所示)。</p>
+<p><img src="/../../images/57c5d561a04698f9a1403d5219eda1f-1677210516519.png"></p>
+<p>​	然而不是所有场景都会产生写放大，比如一些日志场杨景，只有数据插入而没有更新，此时索引表不存在 脏数据 。故不需要读主表，只做主表和索引表的插入操作即可可。这样，为维护索引产生的写放大最低。为此Lindorm提出了 Mutability 的概念，对主表的写入模式进行分类约束，并据此组织索引数据，针对不同的业务需求实现最低的索引组织成本。</p>
+<p>按写入约束由强到弱，有四种Mutability级别:</p>
+<table>
+<thead>
+<tr>
+<th>mutability</th>
+<th>约束</th>
+<th>操作成本（越低越好）</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>无索引</td>
+<td>NA</td>
+<td>1</td>
+<td>没有索引的情况下，写自己就够了，所以是1次操作</td>
+</tr>
+<tr>
+<td>IMMUTABLE</td>
+<td>整行写入，不可更新或删除</td>
+<td>2</td>
+<td>写索引表。所有场景中成本最低，性能最好</td>
+</tr>
+<tr>
+<td>IMMUTABLE_ROWS</td>
+<td>整行写入，不可更新，可删除</td>
+<td>2~3</td>
+<td>正常写入时：写主表，写索引表。在删除场景下需额外读一次主表</td>
+</tr>
+<tr>
+<td>MUTABLE_LATEST</td>
+<td>可更新，可删除</td>
+<td>4</td>
+<td>读主表，删索引，写索引，写主表</td>
+</tr>
+<tr>
+<td>MUTABLE_ALL</td>
+<td>可使用自定义时间戳写</td>
+<td>4</td>
+<td>同上</td>
+</tr>
+</tbody></table>
+<p>​	<em><strong>IMMUTABLE</strong></em> 和<em><strong>IMMUTABLE_ ROWS</strong></em> 因为不涉及数据更新，无写放大问题，成本最低，适合高吞吐写的场景，如日志、监控等。 <em><strong>IMMUTABLE</strong></em> 由于不涉及删除，故可充分利用Lindorm的多IDC部署，实现多活的数据访问，如下文的库存天梭场景。两个Mutable场景则允许数据进行修改和删除，索引组织成本高于Immutable场景。</p>
+<p>​	选择两类Immutable约束可以有效降低索引场景下的写时延，提高整体吞吐。实际的业务中，不满足Immutable约束的场景，通常可以通过数据冗余来改造成immutable场景，从本特性中受益。</p>
+<h2 id="3-3-自定义时间戳的索引更新"><a href="#3-3-自定义时间戳的索引更新" class="headerlink" title="3.3 自定义时间戳的索引更新"></a>3.3 自定义时间戳的索引更新</h2><p>​	用户自定义时间戳写入 是一个强大的能力，使得用户可以在使用任意时间戳(过去的，未来的)进行数据更新，由系统来保证只有时间戳最大的数据生效。自定义时间戳特性在控制数据有效期、乱序、幂等等场景中发挥着重要的作用，在HBase中有广泛的应用。</p>
+<p>​	Lindorm支持 列级时间戳 ，主表天然支持自定义时间戳写入数据。很多具备MVCC能力的系统也支持这一特性。但在支持二级索引和时间戳的NoSQL系统中，支持自定义时间戳索引更新的，就比较罕见了。因为时间戳乱序写入很难正确维护索引数据的更新和删除。</p>
+<p>​	Lindorm全局二级索引解决了这个问题，支持列级别自定义时间戳更新。下面是两个使用自定义时间戳的实际业务场景:<br>​	<strong>(1)导入与实时并存:</strong> 在同时需要 实时更新 和 t+1数据导入 的场景下，实时写入可以使用当前时间，而历史数据导入可以使用昨天 23:59:59 这个时间。这样，当天未更新过的数据可以通过导入获得更新，已更新过的数据也不会被导入覆盖。<br>​	<strong>(2)追消息:</strong> 业务系统通过消息来触发一系列处理逻辑，在消息出现积压时，系统可以跳过积压的消息，直接处理当前消息，并在事后通过 追消息 来处理之前积压的任务。或者，当业务逻辑有问题时，系统也可以跳过一部分消息来规避问题，在业务修复后重新处理。此时，业务可以通过使用消息本身的时间来写入数据，以此来保证追的消息和正常消息的准确覆盖关系。</p>
+<h2 id="3-4-全冗余索引"><a href="#3-4-全冗余索引" class="headerlink" title="3.4 全冗余索引"></a>3.4 全冗余索引</h2><p>​	为了避免查询索引之后再回查主表，通常会在索引表中 冗余一部分主表列，也称为 冗余索引 或 覆盖索引 。为了保证性能， 全冗余 索引是比较常用的冗余方案。Lindorm支持3种冗余模式，可以在主表schema变化以及动态列场景下，简单的实现<strong>全冗余</strong>索引。</p>
+<ul>
+<li>**冗余指定的列:**用户显式指定要冗余主表的哪些列</li>
+<li>**冗余schema中的所有列:**当我们需要 全冗余索引时，不需要在CREATE INDEX中将主表的每一列都显式添加进来，而是通过一个常量来描述“冗余所有列”，当主表新增列时，全冗余索引表会自动冗余这个新增列，无需重建索引，也无需担心新增列的查询会导致回表了</li>
+<li>**冗余动态列:**Lindorm同时支持固定schema和松散schema(即 动态列)。通过 DYNAMIC 冗余模式，索引表能够自动冗余主表中的所有动态列，也会冗余主表schema中的所有列。</li>
+</ul>
+<h1 id="4-技术挑战"><a href="#4-技术挑战" class="headerlink" title="4.技术挑战"></a>4.技术挑战</h1><p>在设计Lindorm全局二级索引的过程中，我们面临很多技术挑战，这里我们讨论其中三个难点:</p>
+<h2 id="4-1-高性能的全局强一致保证"><a href="#4-1-高性能的全局强一致保证" class="headerlink" title="4.1 高性能的全局强一致保证"></a>4.1 高性能的全局强一致保证</h2><p>​	对于全局二级索引，索引表和主表可能分布在不同的机器上，一般依赖分布式事务来保证主表和索引表的数据一致性。由于Lindorm的主要场景是高吞吐、低时延，引入分布式事务必然会带来较多额外开销，影响吞吐和性能。所以，Lindorm采用了一种乐观更新机制，保证用户在写入成功后能一定读到主表&#x2F;索引表数据的强一致语义，但不保证在写入过程或写入未决时的隔离性(即不承诺数据在主表和索引表的同时可见性)。这样，在满足大多数场景接受的强一致更新需求的同时，可以将索引更新的额外开销降到最低。结合Mutability，Lindorm可以将特定场景下的索引维护成本降到最低。</p>
+<h2 id="4-2-面向松散Schema的二级索引结构设计"><a href="#4-2-面向松散Schema的二级索引结构设计" class="headerlink" title="4.2 面向松散Schema的二级索引结构设计"></a>4.2 面向松散Schema的二级索引结构设计</h2><p>​	松散Schema是NoSQL有别于RDBMS的重要能力，包括动态列，自定义时间戳，TTL。Lindorm的主表原生支持这些能力，但在将这些能力赋予全局二级索引时遇到了一些困难。</p>
+<p>（1）任意时间戳<br>支持自定义时间戳的全局二级索引，其难点在于索引数据时间戳的设置。删除操作本身是通过写入DeleteMarker实现的，DeleteMarker的生效也依赖时间戳。在索引场景下，同一索引行可能会被反复插入和删除，此时，DeleteMarker的时间戳很难确定，过小可能会导致老数据删不掉，过大会导致新增数据插入无效。</p>
+<p>（2）动态列<br>动态列本身的不确定性使得它作为索引列的意义大大降低，但仍可以做为冗余列存在。冗余动态列要求索引表必须也是松散schema的，同时，在整个查询编译与优化全链路中，都要考虑动态列的存在。</p>
+<p>（3）TTL<br>TTL即数据有效期，保证过期数据一定读不到。在有索引的场景，重要的是保证主表行和对应的索引行同时过期。这就要求二者的每一列都有相同的时间戳。由于索引表不一定会映射主表的所有列，这里会产生一系列问题，包括：</p>
+<ul>
+<li><p>索引表的主键会包括主表的非主键，主表在多次更新后，这些非主键列可能会具有不同的时间戳，这会导致索引表的不同主键列无法一起过期，导致索引行与主表行的数据不一致。</p>
+</li>
+<li><p>索引表中缺失部分主表列，这部分列的时间戳大于其他列的时间戳，导致主表行的整体过期时间晚于对应的索引行。</p>
+</li>
+<li><p>冗余列时间戳与索引行删除之间的冲突：直觉上看，索引行的冗余列要与主表行的对应列有相同的时间戳，这样二者才能同时过期。但如果同一个索引行被反复插入和删除，则索引行的Delete Marker会覆盖后插入的冗余列，导致冗余列失效。</p>
+</li>
+<li><p>自定义时间戳产生的时间戳混乱，会使得上述问题的更难解决</p>
+<p>Lindorm通过独特的索引结构设计，解决了这些问题，赋予了用户可以在索引场景下使用具备松散schema能力的强大索引能力。</p>
+</li>
+</ul>
+<h2 id="4-3-大表建索引"><a href="#4-3-大表建索引" class="headerlink" title="4.3 大表建索引"></a>4.3 大表建索引</h2><p>​	这里要解决的问题是给已经有很多数据的大表增加一个索引，需要对海量的历史数据构建索引。由于数据量巨大，索引构建会消耗数小 时乃至数天的时间，消耗大量的资源。要解决:</p>
+<ul>
+<li>可预期:速度足够快，能够在可预期、可接受的时间内完成</li>
+<li>不影响在线业务:大批量的索引构建会消耗大量的CPU、内存、网络、磁盘等资源，比如进行合理的隔离和流控，将构建过程对业务的影响降到最低。</li>
+</ul>
+<p>​    Lindorm充分利用存储计算分离和多IDC部署的优势，对大表的索引构建任务进行细粒度拆分和全局调度;必要<br>时，也可将构建任务offload到独立的worker节点上来隔离负载，从而实现数百TB大表索引构建的可预期的、最小化生产影响的灵活控制。</p>
+<h1 id="5-典型案例"><a href="#5-典型案例" class="headerlink" title="5.典型案例"></a>5.典型案例</h1><h2 id="5-1-蚂蚁搜索dump系统（ASDI）"><a href="#5-1-蚂蚁搜索dump系统（ASDI）" class="headerlink" title="5.1. 蚂蚁搜索dump系统（ASDI）"></a>5.1. 蚂蚁搜索dump系统（ASDI）</h2><p>​	蚂蚁搜索目前承载了整个蚂蚁的全部搜索业务。其中，蚂蚁搜索dump系统(下文简称ASDI)作为搜索引擎的数据提供方和业务接入平台，是整个搜索链路的核心节点之一。ASDI在数据访问方面有两个核心需求:</p>
+<ul>
+<li><p>**镜像表:**类似维度表，存储各个上游业务各个维度的数据，如商品数据，店铺数据，商品店铺关系等等。业务数据的变更消息会直接触发镜像表的更新，对多张镜像表进行不同维度的多轮join，输出给结果表。</p>
+</li>
+<li><p>**结果表:**大宽表，存储镜像表的join结果，输出给搜索引擎</p>
+</li>
+</ul>
+<p>​    ASDI的核心指标是数据的同步延迟，即数据变更消息从上游业务系统流入ASDI，经过一系列变换，最终输出给搜索引擎的总时延。这个时延中占比最高的是镜像表的更新和join。为了支持按多种字段join，镜像表需要支持索引，对索引的要求有:</p>
+<ul>
+<li><p>高吞吐、低时延的读写:读写RT直接决定了整个业务层的全链路延迟，必须尽可能的小</p>
+</li>
+<li><p>多索引:一张镜像表往往需要按多个组合字段进行join，需要同时建多个索引，少则一两个，多则七八个。存储系统需要在单表有如此多索引的情况下保证主表的更新者吐和RT</p>
+</li>
+<li><p>强一致:写成功后立即读，必须能够从主表和所有索引表中读到刚刚写入的数据</p>
+</li>
+<li><p>频繁的schema变更:业务模型持续演进，经常会需要新增列和索引变更需求(移除不需要的索引，增加新索引)等等。系统必须具备低成本、灵活调整schema的能力。</p>
+</li>
+</ul>
+<p>​	综上，ASDI需要高吞吐、低时延的支持全局二级索引的强一致存储系统来实现镜像表的数据访问。ASDI之前运行于Alihb1.1版本上，已经平稳度过2017年的双12和2018年双11，但随着业务发展，Alihb存在一些较难解决的问题，需要迁移Lindorm来解决:</p>
+<ul>
+<li><p>自定义时间戳:需要自定义时间戳的全局二级索引写入能力，以提供乱序消息处理的能力。</p>
+</li>
+<li><p>大表建索引:部分TB级别的表，在遇到索引调整时，用时较长。</p>
+</li>
+<li><p>读热点:业务变更可能导致部分索引表出现短暂的读热点，把单机打爆。Lindorm的单机能力是HBase的3倍以上，可以从容应对大部分热点。对于单机仍然无法抗住的热点，可以通过扩散表的机制来提升吞吐。</p>
+</li>
+</ul>
+<p>​	目前，ASDI已部分迁移至Lindorm中。Lindorm具备3倍于HBase的基准性能，支持自定义时间戳的全局二级索引。易维护的全冗余索引，可选的Mutability等特性，赋予了业务更高的吞吐、更低的全链路延迟、更灵活的业务模式以及更低的成本。</p>
+<h1 id="5-3-优酷播放记录"><a href="#5-3-优酷播放记录" class="headerlink" title="5.3 优酷播放记录"></a>5.3 优酷播放记录</h1><p>存储亿级用户(注册用户，未注册用户)的播放记录数据，通过二级索引提供多维度查询能力。过去通过分库分表运行在关系型数据库中，存在两个难以解决的问题：</p>
+<ul>
+<li>scale out能力弱，在既有分库数量下只能存储登录用户的近半年的数据，无法满足快速增长的海量的未注册用户和全量的播放记录数据存储需求。</li>
+<li>业务处于发展阶段，会有新增字段和索引变更需求。在大规模分库分表场景下，schema变更和索引变更的时间较长，成本较高。</li>
+</ul>
+<p>在迁移Lindorm之后，Lindorm天然的scale out架构可以很好的满足业务爆发式的数据增长需求。大表新增列操作可在分钟级完成，索引表会自动冗余新增列。索引的调整也比以前更容易，耗时更短。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://yanjianace.github.io">GuangXi Yan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://yanjianace.github.io/post/64567.html">https://yanjianace.github.io/post/64567.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yanjianace.github.io" target="_blank">光曦的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/post/46279.html" title="JAVA基础知识回顾（一）:从项目出发回顾JAVA垃圾回收知识点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">JAVA基础知识回顾（一）:从项目出发回顾JAVA垃圾回收知识点</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">GuangXi Yan</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">1.引言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">2.功能介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E9%87%8D%E8%A6%81%E7%89%B9%E6%80%A7"><span class="toc-number">3.</span> <span class="toc-text">3 重要特性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 强一致性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E5%8F%AF%E9%80%89%E7%9A%84%E7%B4%A2%E5%BC%95%E7%BB%84%E7%BB%87%E6%88%90%E6%9C%AC"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 可选的索引组织成本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%97%B6%E9%97%B4%E6%88%B3%E7%9A%84%E7%B4%A2%E5%BC%95%E6%9B%B4%E6%96%B0"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 自定义时间戳的索引更新</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E5%85%A8%E5%86%97%E4%BD%99%E7%B4%A2%E5%BC%95"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 全冗余索引</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%8A%80%E6%9C%AF%E6%8C%91%E6%88%98"><span class="toc-number">4.</span> <span class="toc-text">4.技术挑战</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%85%A8%E5%B1%80%E5%BC%BA%E4%B8%80%E8%87%B4%E4%BF%9D%E8%AF%81"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 高性能的全局强一致保证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E9%9D%A2%E5%90%91%E6%9D%BE%E6%95%A3Schema%E7%9A%84%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 面向松散Schema的二级索引结构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-%E5%A4%A7%E8%A1%A8%E5%BB%BA%E7%B4%A2%E5%BC%95"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 大表建索引</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E5%85%B8%E5%9E%8B%E6%A1%88%E4%BE%8B"><span class="toc-number">5.</span> <span class="toc-text">5.典型案例</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E8%9A%82%E8%9A%81%E6%90%9C%E7%B4%A2dump%E7%B3%BB%E7%BB%9F%EF%BC%88ASDI%EF%BC%89"><span class="toc-number">5.1.</span> <span class="toc-text">5.1. 蚂蚁搜索dump系统（ASDI）</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-3-%E4%BC%98%E9%85%B7%E6%92%AD%E6%94%BE%E8%AE%B0%E5%BD%95"><span class="toc-number">6.</span> <span class="toc-text">5.3 优酷播放记录</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/64567.html" title="Lindorm系列(二)Lindorm的二级索引">Lindorm系列(二)Lindorm的二级索引</a><time datetime="2023-02-24T02:59:26.000Z" title="发表于 2023-02-24 10:59:26">2023-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/46279.html" title="JAVA基础知识回顾（一）:从项目出发回顾JAVA垃圾回收知识点">JAVA基础知识回顾（一）:从项目出发回顾JAVA垃圾回收知识点</a><time datetime="2023-02-14T13:00:50.000Z" title="发表于 2023-02-14 21:00:50">2023-02-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/1.html" title="Lindorm系列(一) 什么是lindorm,它能做什么">Lindorm系列(一) 什么是lindorm,它能做什么</a><time datetime="2023-02-12T11:18:13.785Z" title="发表于 2023-02-12 19:18:13">2023-02-12</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By GuangXi Yan</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
