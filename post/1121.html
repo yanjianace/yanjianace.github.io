@@ -1,0 +1,219 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Java编码技巧（持续更新） | 光曦的博客</title><meta name="author" content="GuangXi Yan"><meta name="copyright" content="GuangXi Yan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="​	如何编写出高效的代码，是每个程序员每天都在面对的问题。只有高效的代码才嫩带来高效率。本文总结了我自己在日常开发过程中一些好的编码方式，同时在阅读了大量其他优秀的文章后，选了一些个人认为比较常用和优秀的编码方式进行总结。本文持续更新。 1.尽量使用基本数据类型，避免自动装箱和拆箱​	Java 中的基本数据类型double、float、long、int、short、char、boolean，分别对">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java编码技巧（持续更新）">
+<meta property="og:url" content="https://yanjianace.github.io/post/1121.html">
+<meta property="og:site_name" content="光曦的博客">
+<meta property="og:description" content="​	如何编写出高效的代码，是每个程序员每天都在面对的问题。只有高效的代码才嫩带来高效率。本文总结了我自己在日常开发过程中一些好的编码方式，同时在阅读了大量其他优秀的文章后，选了一些个人认为比较常用和优秀的编码方式进行总结。本文持续更新。 1.尽量使用基本数据类型，避免自动装箱和拆箱​	Java 中的基本数据类型double、float、long、int、short、char、boolean，分别对">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000">
+<meta property="article:published_time" content="2023-03-26T12:17:41.000Z">
+<meta property="article:modified_time" content="2023-03-26T12:32:31.679Z">
+<meta property="article:author" content="GuangXi Yan">
+<meta property="article:tag" content="JAVA">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yanjianace.github.io/post/1121.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Java编码技巧（持续更新）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-26 20:32:31'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = url => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      link.onload = () => resolve()
+      link.onerror = () => reject()
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><hr/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="光曦的博客"><span class="site-name">光曦的博客</span></a></span><div id="menus"><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Java编码技巧（持续更新）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-03-26T12:17:41.000Z" title="发表于 2023-03-26 20:17:41">2023-03-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-26T12:32:31.679Z" title="更新于 2023-03-26 20:32:31">2023-03-26</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Java编码技巧（持续更新）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>​	如何编写出高效的代码，是每个程序员每天都在面对的问题。只有高效的代码才嫩带来高效率。本文总结了我自己在日常开发过程中一些好的编码方式，同时在阅读了大量其他优秀的文章后，选了一些个人认为比较常用和优秀的编码方式进行总结。本文持续更新。</p>
+<h1 id="1-尽量使用基本数据类型，避免自动装箱和拆箱"><a href="#1-尽量使用基本数据类型，避免自动装箱和拆箱" class="headerlink" title="1.尽量使用基本数据类型，避免自动装箱和拆箱"></a>1.尽量使用基本数据类型，避免自动装箱和拆箱</h1><p>​	Java 中的基本数据类型double、float、long、int、short、char、boolean，分别对应包装类Double、Float、Long、Integer、Short、Character、Boolean。 JVM支持基本类型与对应包装类的自动转换，被称为自动装箱和拆箱。装箱和拆箱都是需要CPU和内存资源的，所以应尽量避免使用自动装箱和拆箱。</p>
+<p>​	反例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">sum</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"><span class="type">int</span>[] values = ...;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> value : values) &#123;</span><br><span class="line">    sum += value; <span class="comment">// 相当于result = Integer.valueOf(result.intValue() + value);</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>&#96;正例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">sum</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"><span class="type">int</span>[] values = ...;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> value : values) &#123;</span><br><span class="line">    sum += value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="2-尽量减少方法的重复调用"><a href="#2-尽量减少方法的重复调用" class="headerlink" title="2.尽量减少方法的重复调用"></a>2.尽量减少方法的重复调用</h1><p>​	反例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;UserDO&gt; userList = ...;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; userList.size(); i++) &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>​	正例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;UserDO&gt; userList = ...;</span><br><span class="line"><span class="type">int</span> <span class="variable">userLength</span> <span class="operator">=</span> userList.size();</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; userLength; i++) &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="3-尽量使用字符替换字符串"><a href="#3-尽量使用字符替换字符串" class="headerlink" title="3.尽量使用字符替换字符串"></a>3.尽量使用字符替换字符串</h1><p>​	字符串的长度不确定，而字符的长度固定为1，查找和匹配的效率自然提高了。</p>
+<p>​	反例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">source</span> <span class="operator">=</span> <span class="string">&quot;a:1,b:2,c:3,d:4&quot;</span>;</span><br><span class="line"><span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> source.indexOf(<span class="string">&quot;:&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">target</span> <span class="operator">=</span> source.replace(<span class="string">&quot;:&quot;</span>, <span class="string">&quot;=&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+
+<p>​	正例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">source</span> <span class="operator">=</span> <span class="string">&quot;a:1,b:2,c:3,d:4&quot;</span>;</span><br><span class="line"><span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> source.indexOf(<span class="string">&#x27;:&#x27;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">target</span> <span class="operator">=</span> source.replace(<span class="string">&#x27;:&#x27;</span>, <span class="string">&#x27;=&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="4-不要使用循环拷贝数组，尽量使用System-arraycopy拷贝数组"><a href="#4-不要使用循环拷贝数组，尽量使用System-arraycopy拷贝数组" class="headerlink" title="4.不要使用循环拷贝数组，尽量使用System.arraycopy拷贝数组"></a>4.不要使用循环拷贝数组，尽量使用System.arraycopy拷贝数组</h1><p>​	推荐使用System.arraycopy拷贝数组，也可以使用Arrays.copyOf拷贝数组。</p>
+<p>​	反例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] sources = <span class="keyword">new</span> <span class="title class_">int</span>[] &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"><span class="type">int</span>[] targets = <span class="keyword">new</span> <span class="title class_">int</span>[sources.length];</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; targets.length; i++) &#123;</span><br><span class="line">    targets[i] = sources[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>​	正例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] sources = <span class="keyword">new</span> <span class="title class_">int</span>[] &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"><span class="type">int</span>[] targets = <span class="keyword">new</span> <span class="title class_">int</span>[sources.length];</span><br><span class="line">System.arraycopy(sources, <span class="number">0</span>, targets, <span class="number">0</span>, targets.length);</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="5-不要使用循环拷贝集合，尽量使用JDK提供的方法拷贝集合"><a href="#5-不要使用循环拷贝集合，尽量使用JDK提供的方法拷贝集合" class="headerlink" title="5.不要使用循环拷贝集合，尽量使用JDK提供的方法拷贝集合"></a>5.不要使用循环拷贝集合，尽量使用JDK提供的方法拷贝集合</h1><p>​	JDK提供的方法可以一步指定集合的容量，避免多次扩容浪费时间和空间。同时，这些方法的底层也是调用System.arraycopy方法实现，进行数据的批量拷贝效率更高。</p>
+<p>​	通过循环拷贝数组和通过System.arraycopy拷贝数组的区别在于效率和简洁性。</p>
+<p>​	循环拷贝数组是一种基本的方法，通过迭代源数组的每个元素，将其复制到目标数组中。这种方法在小型数组上运行良好，但在大型数组上可能会变得很慢，因为它需要多次循环。此外，它需要程序员编写大量的代码来迭代数组元素。</p>
+<p>​	System.arraycopy是Java的一个高效的方法，可用于快速复制数组。这个方法可以在一次调用中将源数组的一个子区域复制到目标数组的相同或不同的位置。由于它是原生方法，因此它的性能非常高，并且它不需要程序员编写循环代码。这使得代码更具简洁性和可读性。</p>
+<p>​	因此，如果需要复制大量数据或需要高效的操作，System.arraycopy是更好的选择。如果只需要复制小型数组或代码的可读性比性能更重要，则循环方法是可以接受的。</p>
+<p>​	反例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">List&lt;UserDO&gt; user1List = ...;</span><br><span class="line">List&lt;UserDO&gt; user2List = ...;</span><br><span class="line">List&lt;UserDO&gt; userList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(user1List.size() + user2List.size());</span><br><span class="line"><span class="keyword">for</span> (UserDO user1 : user1List) &#123;</span><br><span class="line">    userList.add(user1);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (UserDO user2 : user2List) &#123;</span><br><span class="line">    userList.add(user2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>​	正例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;UserDO&gt; user1List = ...;</span><br><span class="line">List&lt;UserDO&gt; user2List = ...;</span><br><span class="line">List&lt;UserDO&gt; userList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(user1List.size() + user2List.size());</span><br><span class="line">userList.addAll(user1List);</span><br><span class="line">userList.addAll(user2List);</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="6-尽量使用HashSet判断值存在"><a href="#6-尽量使用HashSet判断值存在" class="headerlink" title="6.尽量使用HashSet判断值存在"></a>6.尽量使用HashSet判断值存在</h1><p>​	在Java集合类库中，List的contains方法普遍时间复杂度是O(n)，而HashSet的时间复杂度为O(1)。如果需要频繁调用contains方法查找数据，可以先将List转换成HashSet。</p>
+<p>​	反例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Long&gt; adminIdList = ...;</span><br><span class="line">List&lt;UserDO&gt; userDOList = ...;</span><br><span class="line">List&lt;UserVO&gt; userVOList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(userDOList.size());</span><br><span class="line"><span class="keyword">for</span> (UserDO userDO : userDOList) &#123;</span><br><span class="line">    <span class="keyword">if</span> (adminIdList.contains(userDO.getId())) &#123;</span><br><span class="line">        userVOList.add(transUser(userDO));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>​	正例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">javaSet&lt;Long&gt; adminIdSet = ...;</span><br><span class="line">List&lt;UserDO&gt; userDOList = ...;</span><br><span class="line">List&lt;UserVO&gt; userVOList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(userDOList.size());</span><br><span class="line"><span class="keyword">for</span> (UserDO userDO : userDOList) &#123;</span><br><span class="line">    <span class="keyword">if</span> (adminIdSet.contains(userDO.getId())) &#123;</span><br><span class="line">        userVOList.add(transUser(userDO));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://yanjianace.github.io">GuangXi Yan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://yanjianace.github.io/post/1121.html">https://yanjianace.github.io/post/1121.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yanjianace.github.io" target="_blank">光曦的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/JAVA/">JAVA</a></div><div class="post_share"><div class="social-share" data-image="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/post/44244.html" title="项目里读取文件遇到的一个坑"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">项目里读取文件遇到的一个坑</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://inews.gtimg.com/newsapp_bt/0/13247265949/1000" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">GuangXi Yan</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%EF%BC%8C%E9%81%BF%E5%85%8D%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E5%92%8C%E6%8B%86%E7%AE%B1"><span class="toc-number">1.</span> <span class="toc-text">1.尽量使用基本数据类型，避免自动装箱和拆箱</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%B0%BD%E9%87%8F%E5%87%8F%E5%B0%91%E6%96%B9%E6%B3%95%E7%9A%84%E9%87%8D%E5%A4%8D%E8%B0%83%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">2.尽量减少方法的重复调用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8%E5%AD%97%E7%AC%A6%E6%9B%BF%E6%8D%A2%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">3.</span> <span class="toc-text">3.尽量使用字符替换字符串</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E4%B8%8D%E8%A6%81%E4%BD%BF%E7%94%A8%E5%BE%AA%E7%8E%AF%E6%8B%B7%E8%B4%9D%E6%95%B0%E7%BB%84%EF%BC%8C%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8System-arraycopy%E6%8B%B7%E8%B4%9D%E6%95%B0%E7%BB%84"><span class="toc-number">4.</span> <span class="toc-text">4.不要使用循环拷贝数组，尽量使用System.arraycopy拷贝数组</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E4%B8%8D%E8%A6%81%E4%BD%BF%E7%94%A8%E5%BE%AA%E7%8E%AF%E6%8B%B7%E8%B4%9D%E9%9B%86%E5%90%88%EF%BC%8C%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8JDK%E6%8F%90%E4%BE%9B%E7%9A%84%E6%96%B9%E6%B3%95%E6%8B%B7%E8%B4%9D%E9%9B%86%E5%90%88"><span class="toc-number">5.</span> <span class="toc-text">5.不要使用循环拷贝集合，尽量使用JDK提供的方法拷贝集合</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8HashSet%E5%88%A4%E6%96%AD%E5%80%BC%E5%AD%98%E5%9C%A8"><span class="toc-number">6.</span> <span class="toc-text">6.尽量使用HashSet判断值存在</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/1121.html" title="Java编码技巧（持续更新）">Java编码技巧（持续更新）</a><time datetime="2023-03-26T12:17:41.000Z" title="发表于 2023-03-26 20:17:41">2023-03-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/44244.html" title="项目里读取文件遇到的一个坑">项目里读取文件遇到的一个坑</a><time datetime="2023-03-18T11:54:41.000Z" title="发表于 2023-03-18 19:54:41">2023-03-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/52909.html" title="RocketMq(二) 均衡负载">RocketMq(二) 均衡负载</a><time datetime="2023-03-12T12:13:01.000Z" title="发表于 2023-03-12 20:13:01">2023-03-12</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/51549.html" title="RocketMq重复消费小结">RocketMq重复消费小结</a><time datetime="2023-03-05T14:14:52.000Z" title="发表于 2023-03-05 22:14:52">2023-03-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/64567.html" title="Lindorm系列(二)Lindorm的二级索引">Lindorm系列(二)Lindorm的二级索引</a><time datetime="2023-02-24T02:59:26.000Z" title="发表于 2023-02-24 10:59:26">2023-02-24</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By GuangXi Yan</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
